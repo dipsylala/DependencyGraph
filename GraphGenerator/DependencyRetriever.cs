@@ -5,7 +5,7 @@ namespace GraphGenerator
 {
     public class DependencyRetriever
     {
-        internal string ResolveAssemblyPath(AssemblyNameReference assemblyRef, BaseAssemblyResolver resolver)
+        internal string? ResolveAssemblyPath(AssemblyNameReference assemblyRef, BaseAssemblyResolver resolver)
         {
             try
             {

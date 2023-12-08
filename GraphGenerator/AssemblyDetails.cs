@@ -20,7 +20,7 @@
             Dependencies = new List<AssemblyDetails>();
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is AssemblyDetails details && FullPath == details.FullPath;
         }

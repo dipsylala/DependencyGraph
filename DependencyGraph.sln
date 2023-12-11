@@ -5,7 +5,9 @@ VisualStudioVersion = 17.8.34309.116
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DependencyGraph", "DependencyGraph\DependencyGraph.csproj", "{A39953C8-1B1D-45C7-9297-2F88E41B96D9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphGenerator", "GraphGenerator\GraphGenerator.csproj", "{ED0AC38E-4691-4F9B-BD6E-66811FEBD78B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphGenerator", "GraphGenerator\GraphGenerator.csproj", "{ED0AC38E-4691-4F9B-BD6E-66811FEBD78B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphGenerator.UnitTests", "GraphGenerator.UnitTests\GraphGenerator.UnitTests.csproj", "{786CC1B3-F264-4FB5-AEF2-18A9929657D8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{ED0AC38E-4691-4F9B-BD6E-66811FEBD78B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED0AC38E-4691-4F9B-BD6E-66811FEBD78B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ED0AC38E-4691-4F9B-BD6E-66811FEBD78B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{786CC1B3-F264-4FB5-AEF2-18A9929657D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{786CC1B3-F264-4FB5-AEF2-18A9929657D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{786CC1B3-F264-4FB5-AEF2-18A9929657D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{786CC1B3-F264-4FB5-AEF2-18A9929657D8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

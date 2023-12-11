@@ -3,13 +3,8 @@ namespace GraphGenerator.UnitTests
     [TestFixture]
     public class Tests
     {
-        [SetUp]
-        public void Setup()
-        {
-        }
-
         [Test]
-        public void Should_Generate_Dependency_Graph_For_Core()
+        public void Generate_Dependency_Graph_For_Core()
         {
             var sut = new DependencyRetriever();
 
@@ -21,14 +16,15 @@ namespace GraphGenerator.UnitTests
             var containsMain = results.Any(x => x.Name == "CoreMain");
             var containsDependency = results.Any(x => x.Name == "CoreDependency" && x.Found == true);
 
-            Assert.IsTrue(containsMain);
-            Assert.IsTrue(containsDependency);
-
-            Assert.Pass();
+            Assert.Multiple(() =>
+            {
+                Assert.That(containsMain, Is.True);
+                Assert.That(containsDependency, Is.True);
+            });
         }
 
         [Test]
-        public void Should_Generate_Dependency_Graph_For_Framework()
+        public void Generate_Dependency_Graph_For_Framework()
         {
             var sut = new DependencyRetriever();
 
@@ -40,11 +36,19 @@ namespace GraphGenerator.UnitTests
             var containsMain = results.Any(x => x.Name == "FrameworkMain");
             var containsDependency= results.Any(x => x.Name == "FrameworkDependency" && x.Found == true);
 
-            Assert.IsTrue(containsMain);
-            Assert.IsTrue(containsDependency);
+            Assert.Multiple(() =>
+            {
+                Assert.That(containsMain, Is.True);
+                Assert.That(containsDependency, Is.True);
+            });
+        }
 
+        [Test]
+        public void Exception_If_File_Does_Not_Exist()
+        {
+            var sut = new DependencyRetriever();
 
-            Assert.Pass();
+            Assert.Throws<FileNotFoundException>(() => sut.GetDependencyByAssembly("artifacts\\DoesNotExist.exe", new List<string>(), false));
         }
     }
 }

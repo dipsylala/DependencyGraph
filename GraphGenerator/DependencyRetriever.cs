@@ -24,7 +24,7 @@ namespace GraphGenerator
             }
         }
 
-        public HashSet<AssemblyDetails> GetDependencyByAssembly(string initialAssemblyPath, List<string> additionalDirectories, bool verbose = false)
+        public HashSet<AssemblyDetails> GetDependencyByAssembly(string initialAssemblyPath, List<string> additionalDirectories, bool verbose = false, bool norecurse = false)
         {
             var assemblyResolver = new DefaultAssemblyResolver();
 
@@ -43,7 +43,7 @@ namespace GraphGenerator
             // Let's see if it's worth continuing
             try
             {
-                Mono.Cecil.AssemblyDefinition.ReadAssembly(initialAssemblyPath, readerParameters);
+                AssemblyDefinition.ReadAssembly(initialAssemblyPath, readerParameters);
             }
             catch
             {
@@ -53,7 +53,7 @@ namespace GraphGenerator
             var initialAssembly = new AssemblyDetails(initialAssemblyPath, Path.GetFileName(initialAssemblyPath), null, null, true);
 
             assembliesToProcess.Enqueue(initialAssembly);
-
+            
             while (assembliesToProcess.Count > 0)
             {
                 var assemblyDetails = assembliesToProcess.Dequeue();
@@ -93,7 +93,11 @@ namespace GraphGenerator
                                 if (!processedAssemblies.Contains(refAssemblyDetails))
                                 {
                                     assemblyDetails.Dependencies.Add(refAssemblyDetails);
-                                    assembliesToProcess.Enqueue(refAssemblyDetails);
+                                    
+                                    if (norecurse == false)
+                                    {
+                                        assembliesToProcess.Enqueue(refAssemblyDetails);
+                                    }
                                 }
                             }
                         }

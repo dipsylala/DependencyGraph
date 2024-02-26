@@ -4,6 +4,13 @@ namespace GraphGenerator
 {
     public class DependencyRetriever
     {
+
+        internal string? GetTargetFramework(AssemblyDefinition assembly)
+        {
+            var targetFrameworkAttribute = assembly.CustomAttributes.FirstOrDefault(x => x.AttributeType.FullName == "System.Runtime.Versioning.TargetFrameworkAttribute");
+            return targetFrameworkAttribute?.ConstructorArguments[0].Value.ToString();
+        }
+
         internal string? ResolveAssemblyPath(AssemblyNameReference assemblyRef, BaseAssemblyResolver resolver)
         {
             try
@@ -36,14 +43,14 @@ namespace GraphGenerator
             // Let's see if it's worth continuing
             try
             {
-                AssemblyDefinition.ReadAssembly(initialAssemblyPath, readerParameters);
+                Mono.Cecil.AssemblyDefinition.ReadAssembly(initialAssemblyPath, readerParameters);
             }
             catch
             {
                 throw new FileNotFoundException($"Could not load {initialAssemblyPath}");
             }
 
-            var initialAssembly = new AssemblyDetails(initialAssemblyPath, Path.GetFileName(initialAssemblyPath), "", true);
+            var initialAssembly = new AssemblyDetails(initialAssemblyPath, Path.GetFileName(initialAssemblyPath), null, null, true);
 
             assembliesToProcess.Enqueue(initialAssembly);
 
@@ -61,6 +68,7 @@ namespace GraphGenerator
                     var cecilAssemblyDefinition = AssemblyDefinition.ReadAssembly(assemblyDetails.FullPath, readerParameters);
                     assemblyDetails.Name = cecilAssemblyDefinition.Name.Name;
                     assemblyDetails.Version = cecilAssemblyDefinition.Name.Version.ToString();
+                    assemblyDetails.TargetFramework = GetTargetFramework(cecilAssemblyDefinition);
 
                     if (verbose)
                     {
@@ -75,12 +83,12 @@ namespace GraphGenerator
 
                             if (resolvedAssemblyPath == null)
                             {
-                                var refAssemblyDetails = new AssemblyDetails("", cecilAssemblyReference.Name, cecilAssemblyReference.Version.ToString(), false);
+                                var refAssemblyDetails = new AssemblyDetails("", cecilAssemblyReference.Name, cecilAssemblyReference.Version.ToString(), null, false);
                                 assemblyDetails.Dependencies.Add(refAssemblyDetails);
                             } 
                             else
                             {
-                                var refAssemblyDetails = new AssemblyDetails(resolvedAssemblyPath, cecilAssemblyReference.Name, cecilAssemblyReference.Version.ToString(), true);
+                                var refAssemblyDetails = new AssemblyDetails(resolvedAssemblyPath, cecilAssemblyReference.Name, cecilAssemblyReference.Version.ToString(), null, true);
 
                                 if (!processedAssemblies.Contains(refAssemblyDetails))
                                 {

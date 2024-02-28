@@ -11,7 +11,7 @@ var norecurse = false;
 
 var options = new OptionSet {
     { "v|verbose", "Enable verbose output", v => verbose = v != null },
-    { "i|input=", "Path to the input file", i => input = i },
+    { "i|input=", "Path to the input file (can include file wildcards)", i => input = i },
     { "n|norecurse", "Don't recurse - focus on the input file", n => norecurse = n != null},
     { "j|json=", "The output json file", i => json = i },
     { "h|help", "Show this message and exit", h => showHelp = h != null },
@@ -49,7 +49,7 @@ var dependencyRetriever = new DependencyRetriever();
 HashSet<AssemblyDetails> processedAssemblies;
 try
 {
-    processedAssemblies = dependencyRetriever.GetDependencyByAssembly(input, new List<string>(), verbose, norecurse);
+    processedAssemblies = dependencyRetriever.GetDependencyByAssembly(input, new List<string>(), verbose);
 }
 catch (FileNotFoundException ex)
 {

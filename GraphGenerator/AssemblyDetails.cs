@@ -15,11 +15,11 @@ namespace GraphGenerator
 
         public List<AssemblyDetails> Dependencies { get; set; }
 
-        public AssemblyDetails(string fullPath, string name, string ?version, string ?targetFramework, bool found)
+        public AssemblyDetails(string name, string fullPath, string? version, string? targetFramework, bool found)
         {
             Name = name;
-            Version = version;
             FullPath = fullPath;
+            Version = version;
             TargetFramework = targetFramework;
             Found = found;
 
@@ -38,7 +38,7 @@ namespace GraphGenerator
 
         public override string ToString()
         {
-            return $"{Name}, Version={Version}, Path={FullPath}, Target Framework={TargetFramework ?? "unavailable"}, Found = {Found}";
+            return $"{Name}, Version={Version}, Path={FullPath}, Target Framework='{TargetFramework ?? "unavailable"}', Found = {Found}";
         }
     }
 }

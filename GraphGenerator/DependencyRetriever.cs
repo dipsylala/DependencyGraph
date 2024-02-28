@@ -24,7 +24,7 @@ namespace GraphGenerator
             }
         }
 
-        public HashSet<AssemblyDetails> GetDependencyByAssembly(string initialAssemblyPath, List<string> additionalDirectories, bool verbose = false, bool norecurse = false)
+        public HashSet<AssemblyDetails> GetDependencyByAssembly(string initialAssemblyPath, List<string> additionalDirectories, bool verbose = false)
         {
             var assemblyResolver = new DefaultAssemblyResolver();
 
@@ -38,22 +38,13 @@ namespace GraphGenerator
 
             var readerParameters = new ReaderParameters { AssemblyResolver = assemblyResolver };
             var processedAssemblies = new HashSet<AssemblyDetails>();
-            var assembliesToProcess = new Queue<AssemblyDetails>();
+            var assembliesToProcess = CreateInitialQueue(initialAssemblyPath, readerParameters);
 
-            // Let's see if it's worth continuing
-            try
+            if (assembliesToProcess.Count == 0)
             {
-                AssemblyDefinition.ReadAssembly(initialAssemblyPath, readerParameters);
-            }
-            catch
-            {
-                throw new FileNotFoundException($"Could not load {initialAssemblyPath}");
+                throw new FileNotFoundException($"Could not find {initialAssemblyPath}");
             }
 
-            var initialAssembly = new AssemblyDetails(initialAssemblyPath, Path.GetFileName(initialAssemblyPath), null, null, true);
-
-            assembliesToProcess.Enqueue(initialAssembly);
-            
             while (assembliesToProcess.Count > 0)
             {
                 var assemblyDetails = assembliesToProcess.Dequeue();
@@ -83,21 +74,17 @@ namespace GraphGenerator
 
                             if (resolvedAssemblyPath == null)
                             {
-                                var refAssemblyDetails = new AssemblyDetails("", cecilAssemblyReference.Name, cecilAssemblyReference.Version.ToString(), null, false);
+                                var refAssemblyDetails = new AssemblyDetails(cecilAssemblyReference.Name, "", cecilAssemblyReference.Version.ToString(), null, false);
                                 assemblyDetails.Dependencies.Add(refAssemblyDetails);
-                            } 
+                            }
                             else
                             {
-                                var refAssemblyDetails = new AssemblyDetails(resolvedAssemblyPath, cecilAssemblyReference.Name, cecilAssemblyReference.Version.ToString(), null, true);
+                                var refAssemblyDetails = new AssemblyDetails(cecilAssemblyReference.Name, resolvedAssemblyPath, cecilAssemblyReference.Version.ToString(), null, true);
 
                                 if (!processedAssemblies.Contains(refAssemblyDetails))
                                 {
                                     assemblyDetails.Dependencies.Add(refAssemblyDetails);
-                                    
-                                    if (norecurse == false)
-                                    {
-                                        assembliesToProcess.Enqueue(refAssemblyDetails);
-                                    }
+                                    assembliesToProcess.Enqueue(refAssemblyDetails);
                                 }
                             }
                         }
@@ -114,6 +101,34 @@ namespace GraphGenerator
 
 
             return processedAssemblies;
+        }
+
+        private Queue<AssemblyDetails> CreateInitialQueue(string initialAssemblyPath, ReaderParameters readerParameters)
+        {
+            var assembliesToProcess = new Queue<AssemblyDetails>();
+            // If no path specified, default to the current directory
+            var directoryName = Path.GetDirectoryName(initialAssemblyPath);
+            if (string.IsNullOrEmpty(directoryName))
+            {
+                directoryName = Directory.GetCurrentDirectory();
+            }
+
+            var initialFileMatches = Directory.GetFiles(directoryName, Path.GetFileName(initialAssemblyPath));
+            foreach (var file in initialFileMatches)
+            {
+                try
+                {
+                    AssemblyDefinition.ReadAssembly(file, readerParameters);
+                    var initialAssembly = new AssemblyDetails(Path.GetFileName(file), file, null, null, true);
+                    assembliesToProcess.Enqueue(initialAssembly);
+                }
+                catch
+                {
+                    Console.WriteLine($"Could not load {file}");
+                }
+            }
+
+            return assembliesToProcess;
         }
     }
 }

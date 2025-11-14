@@ -85,7 +85,7 @@ if (brief)
 
     foreach (var dependency in dependencyList)
     {
-        Console.WriteLine(dependency);
+        Console.WriteLine(dependency.Value);
     }
 
 

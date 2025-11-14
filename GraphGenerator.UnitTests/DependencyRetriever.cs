@@ -8,7 +8,7 @@ namespace GraphGenerator.UnitTests
         {
             var sut = new DependencyRetriever();
 
-            var results = sut.GetDependencyByAssembly("artifacts\\CoreMain.dll", new List<string>(), false);
+            var results = DependencyRetriever.GetDependencyByAssembly("artifacts\\CoreMain.dll", new List<string>(), false);
 
             var containsMain = results.Any(x => x.Name == "CoreMain");
             var containsDependency = results.Any(x => x.Name == "CoreDependency" && x.Found == true);
@@ -25,7 +25,7 @@ namespace GraphGenerator.UnitTests
         {
             var sut = new DependencyRetriever();
 
-            var results = sut.GetDependencyByAssembly("artifacts\\FrameworkMain.dll", new List<string>(), false);
+            var results = DependencyRetriever.GetDependencyByAssembly("artifacts\\FrameworkMain.dll", new List<string>(), false);
 
             var containsMain = results.Any(x => x.Name == "FrameworkMain");
             var containsDependency= results.Any(x => x.Name == "FrameworkDependency" && x.Found == true);
@@ -42,7 +42,7 @@ namespace GraphGenerator.UnitTests
         {
             var sut = new DependencyRetriever();
 
-            var results = sut.GetDependencyByAssembly("artifacts\\*.dll", new List<string>(), false);
+            var results = DependencyRetriever.GetDependencyByAssembly("artifacts\\*.dll", new List<string>(), false);
 
             var containsMain = results.Any(x => x.Name == "FrameworkMain");
             var containsCore= results.Any(x => x.Name == "CoreMain");
@@ -63,7 +63,7 @@ namespace GraphGenerator.UnitTests
         {
             var sut = new DependencyRetriever();
 
-            Assert.Throws<FileNotFoundException>(() => sut.GetDependencyByAssembly("artifacts\\DoesNotExist.exe", new List<string>(), false));
+            Assert.Throws<FileNotFoundException>(() => DependencyRetriever.GetDependencyByAssembly("artifacts\\DoesNotExist.exe", new List<string>(), false));
         }
     }
 }

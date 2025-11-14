@@ -1,4 +1,5 @@
-﻿using GraphGenerator;
+﻿using System.Data;
+using GraphGenerator;
 using Mono.Options;
 using System.Text.Json;
 
@@ -8,11 +9,13 @@ var input = string.Empty;
 var json = string.Empty;
 var showHelp = false;
 var norecurse = false;
+var brief = false;
 
 var options = new OptionSet {
     { "v|verbose", "Enable verbose output", v => verbose = v != null },
     { "i|input=", "Path to the input file (can include file wildcards)", i => input = i },
     { "n|norecurse", "Don't recurse - focus on the input file", n => norecurse = n != null},
+    { "b|brief", "Just show all the dependencies of the input file", b => brief = b != null},
     { "j|json=", "The output json file", i => json = i },
     { "h|help", "Show this message and exit", h => showHelp = h != null },
 };
@@ -49,7 +52,7 @@ var dependencyRetriever = new DependencyRetriever();
 HashSet<AssemblyDetails> processedAssemblies;
 try
 {
-    processedAssemblies = dependencyRetriever.GetDependencyByAssembly(input, new List<string>(), verbose);
+    processedAssemblies = DependencyRetriever.GetDependencyByAssembly(input, new List<string>(), verbose);
 }
 catch (FileNotFoundException ex)
 {
@@ -68,10 +71,31 @@ if (json != string.Empty)
     File.WriteAllText(json, outputJson);
 }
 
+if (brief)
+{
+    var dependencyList = new Dictionary<string, AssemblyDetails>();
+    
+    foreach (var assembly in processedAssemblies)
+    {
+        foreach (var dependency in assembly.Dependencies)
+        {
+            dependencyList[$"{dependency.Name}|{dependency.Version}"] = dependency;
+        }
+    }
+
+    foreach (var dependency in dependencyList)
+    {
+        Console.WriteLine(dependency);
+    }
+
+
+    return 0;
+}
+
 foreach (var assembly in processedAssemblies)
 {
     Console.WriteLine($"Assembly: {assembly}");
-    foreach (var dependency in assembly.Dependencies)
+    foreach (var dependency in assembly.Dependencies.OrderBy(x => x.Name))
     {
         Console.WriteLine($"  Depends on: {dependency}");
     }

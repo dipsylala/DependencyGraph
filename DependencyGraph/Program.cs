@@ -73,21 +73,16 @@ if (json != string.Empty)
 
 if (brief)
 {
-    var dependencyList = new Dictionary<string, AssemblyDetails>();
-    
-    foreach (var assembly in processedAssemblies)
-    {
-        foreach (var dependency in assembly.Dependencies)
-        {
-            dependencyList[$"{dependency.Name}|{dependency.Version}"] = dependency;
-        }
-    }
+    var uniqueDependencies =
+        processedAssemblies
+            .SelectMany(a => a.Dependencies)
+            .DistinctBy(d => (d.Name, d.Version))
+            .OrderBy(d => d.Name);
 
-    foreach (var dependency in dependencyList)
+    foreach (var dependency in uniqueDependencies)
     {
-        Console.WriteLine(dependency.Value);
+        Console.WriteLine(dependency);
     }
-
 
     return 0;
 }

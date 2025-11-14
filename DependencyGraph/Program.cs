@@ -47,12 +47,10 @@ if (ValidateArgs() == false)
     return 1;
 }
 
-var dependencyRetriever = new DependencyRetriever();
-
 HashSet<AssemblyDetails> processedAssemblies;
 try
 {
-    processedAssemblies = DependencyRetriever.GetDependencyByAssembly(input, new List<string>(), verbose);
+    processedAssemblies = DependencyRetriever.GetDependencyByAssembly(input, [], verbose);
 }
 catch (FileNotFoundException ex)
 {
@@ -110,11 +108,11 @@ bool ValidateArgs()
     return true;
 }
 
-void ShowHelp(OptionSet options)
+void ShowHelp(OptionSet optionset)
 {
     Console.WriteLine("Usage: DependencyGraph [OPTIONS]+");
     Console.WriteLine("Iterates through the assemblies and gets their dependencies");
     Console.WriteLine();
     Console.WriteLine("Options:");
-    options.WriteOptionDescriptions(Console.Out);
+    optionset.WriteOptionDescriptions(Console.Out);
 }

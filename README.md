@@ -49,3 +49,17 @@ System.Collections.Specialized, Version=8.0.0.0, Path=C:\Program Files\dotnet\sh
 
 .... and more
 ```
+
+## Don't recurse
+
+```
+❯  dotnet .\DependencyGraph.dll -n -i .\DependencyGraph.dll
+Assembly: DependencyGraph, Version=1.0.0.0, Path=.\DependencyGraph.dll, Target Framework='.NETCoreApp,Version=v8.0', Found = True, IsTopLevel = True
+  Depends on: GraphGenerator, Version=1.0.0.0, Path=.\GraphGenerator.dll, Target Framework='unavailable', Found = True, IsTopLevel = False
+  Depends on: Mono.Options, Version=6.0.0.0, Path=.\Mono.Options.dll, Target Framework='unavailable', Found = True, IsTopLevel = False
+  Depends on: System.Collections, Version=8.0.0.0, Path=C:\Program Files\dotnet\shared\Microsoft.NETCore.App\8.0.22\System.Collections.dll, Target Framework='unavailable', Found = True, IsTopLevel = False
+  Depends on: System.Console, Version=8.0.0.0, Path=C:\Program Files\dotnet\shared\Microsoft.NETCore.App\8.0.22\System.Console.dll, Target Framework='unavailable', Found = True, IsTopLevel = False
+  Depends on: System.Linq, Version=8.0.0.0, Path=C:\Program Files\dotnet\shared\Microsoft.NETCore.App\8.0.22\System.Linq.dll, Target Framework='unavailable', Found = True, IsTopLevel = False
+  Depends on: System.Runtime, Version=8.0.0.0, Path=C:\Program Files\dotnet\shared\Microsoft.NETCore.App\8.0.22\System.Runtime.dll, Target Framework='unavailable', Found = True, IsTopLevel = False
+  Depends on: System.Text.Json, Version=8.0.0.0, Path=C:\Program Files\dotnet\shared\Microsoft.NETCore.App\8.0.22\System.Text.Json.dll, Target Framework='unavailable', Found = True, IsTopLevel = False
+```

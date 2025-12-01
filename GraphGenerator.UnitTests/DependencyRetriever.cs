@@ -1,5 +1,9 @@
 namespace GraphGenerator.UnitTests
 {
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.IO;
+
     [TestFixture]
     public class Tests
     {
@@ -64,6 +68,43 @@ namespace GraphGenerator.UnitTests
             var sut = new DependencyRetriever();
 
             Assert.Throws<FileNotFoundException>(() => DependencyRetriever.GetDependencyByAssembly("artifacts\\DoesNotExist.exe", new List<string>(), false));
+        }
+
+        [Test]
+        public void TopLevelFlag_Is_Set_For_Single_Assembly()
+        {
+            var results = DependencyRetriever.GetDependencyByAssembly("artifacts\\CoreMain.dll", new List<string>(), false);
+
+            // determine top-level assemblies
+            DependencyRetriever.SetTopLevelAssemblies(results);
+
+            var mainIsTop = results.Any(x => x.Name == "CoreMain" && x.IsTopLevel);
+            var depIsTop = results.Any(x => x.Name == "CoreDependency" && x.IsTopLevel);
+
+            Assert.Multiple(() => {
+                Assert.That(mainIsTop, Is.True);
+                Assert.That(depIsTop, Is.False);
+            });
+        }
+
+        [Test]
+        public void TopLevelFlag_Is_Set_For_Wildcard()
+        {
+            var results = DependencyRetriever.GetDependencyByAssembly("artifacts\\*.dll", new List<string>(), false);
+
+            DependencyRetriever.SetTopLevelAssemblies(results);
+
+            var frameworkMainTop = results.Any(x => x.Name == "FrameworkMain" && x.IsTopLevel);
+            var coreMainTop = results.Any(x => x.Name == "CoreMain" && x.IsTopLevel);
+            var frameworkDepTop = results.Any(x => x.Name == "FrameworkDependency" && x.IsTopLevel);
+            var coreDepTop = results.Any(x => x.Name == "CoreDependency" && x.IsTopLevel);
+
+            Assert.Multiple(() => {
+                Assert.That(frameworkMainTop, Is.True);
+                Assert.That(coreMainTop, Is.True);
+                Assert.That(frameworkDepTop, Is.False);
+                Assert.That(coreDepTop, Is.False);
+            });
         }
     }
 }

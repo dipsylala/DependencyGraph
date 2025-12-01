@@ -9,13 +9,15 @@ var input = string.Empty;
 var json = string.Empty;
 var showHelp = false;
 var norecurse = false;
-var brief = false;
+var showDependencies = false;
+var showTopLevel = false;
 
 var options = new OptionSet {
     { "v|verbose", "Enable verbose output", v => verbose = v != null },
     { "i|input=", "Path to the input file (can include file wildcards)", i => input = i },
     { "n|norecurse", "Don't recurse - focus on the input file", n => norecurse = n != null},
-    { "b|brief", "Just show all the dependencies of the input file", b => brief = b != null},
+    { "d|dependencies", "Show only the dependencies (assemblies that are referenced by others)", d => showDependencies = d != null},
+    { "t|toplevel", "Show only the top-level modules (assemblies not referenced by others)", t => showTopLevel = t != null},
     { "j|json=", "The output json file", i => json = i },
     { "h|help", "Show this message and exit", h => showHelp = h != null },
 };
@@ -50,13 +52,15 @@ if (ValidateArgs() == false)
 HashSet<AssemblyDetails> processedAssemblies;
 try
 {
-    processedAssemblies = DependencyRetriever.GetDependencyByAssembly(input, [], verbose);
+    processedAssemblies = DependencyRetriever.GetDependencyByAssembly(input, new List<string>(), verbose);
 }
 catch (FileNotFoundException ex)
 {
     Console.WriteLine(ex.Message);
     return 1;
 }
+
+DependencyRetriever.SetTopLevelAssemblies(processedAssemblies);
 
 var jsonOptions = new JsonSerializerOptions
 {
@@ -69,17 +73,29 @@ if (json != string.Empty)
     File.WriteAllText(json, outputJson);
 }
 
-if (brief)
+if (showDependencies || showTopLevel)
 {
-    var uniqueDependencies =
-        processedAssemblies
-            .SelectMany(a => a.Dependencies)
-            .DistinctBy(d => (d.Name, d.Version))
-            .OrderBy(d => d.Name);
+    IEnumerable<AssemblyDetails> assembliesToShow;
 
-    foreach (var dependency in uniqueDependencies)
+    if (showDependencies && showTopLevel)
     {
-        Console.WriteLine(dependency);
+        // Show all assemblies if both flags are specified
+        assembliesToShow = processedAssemblies.OrderBy(a => a.Name);
+    }
+    else if (showDependencies)
+    {
+        // Show only dependencies (assemblies that are NOT top-level)
+        assembliesToShow = processedAssemblies.Where(a => !a.IsTopLevel).OrderBy(a => a.Name);
+    }
+    else // showTopLevel
+    {
+        // Show only top-level assemblies
+        assembliesToShow = processedAssemblies.Where(a => a.IsTopLevel).OrderBy(a => a.Name);
+    }
+
+    foreach (var assembly in assembliesToShow)
+    {
+        Console.WriteLine(assembly);
     }
 
     return 0;

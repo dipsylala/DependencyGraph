@@ -74,12 +74,12 @@ namespace GraphGenerator
             var processedAssemblies = new HashSet<AssemblyDetails>();
             var assembliesToProcess = CreateInitialQueue(initialAssemblyPath, readerParameters);
 
-            if (assembliesToProcess.Count == 0)
+            if (assembliesToProcess.Count ==0)
             {
                 throw new FileNotFoundException($"Could not find {initialAssemblyPath}");
             }
 
-            while (assembliesToProcess.Count > 0)
+            while (assembliesToProcess.Count >0)
             {
                 var assemblyDetails = assembliesToProcess.Dequeue();
 
@@ -108,15 +108,19 @@ namespace GraphGenerator
                             if (resolvedAssemblyPath == null)
                             {
                                 refAssemblyDetails = new AssemblyDetails(cecilAssemblyReference.Name, "", cecilAssemblyReference.Version.ToString(), null, false);
+                                // Always record the dependency relationship
                                 assemblyDetails.Dependencies.Add(refAssemblyDetails);
                                 continue;
                             }
 
                             refAssemblyDetails = new AssemblyDetails(cecilAssemblyReference.Name, resolvedAssemblyPath, cecilAssemblyReference.Version.ToString(), null, true);
 
+                            // Always record the dependency relationship so top-level detection works independent of processing order
+                            assemblyDetails.Dependencies.Add(refAssemblyDetails);
+
+                            // Enqueue for processing only if not already processed
                             if (!processedAssemblies.Contains(refAssemblyDetails))
                             {
-                                assemblyDetails.Dependencies.Add(refAssemblyDetails);
                                 assembliesToProcess.Enqueue(refAssemblyDetails);
                             }
                         }
@@ -140,6 +144,46 @@ namespace GraphGenerator
             assemblyDetails.Name = cecilAssemblyDefinition.Name.Name;
             assemblyDetails.Version = cecilAssemblyDefinition.Name.Version.ToString();
             assemblyDetails.TargetFramework = GetTargetFramework(cecilAssemblyDefinition);
+        }
+
+        public static void SetTopLevelAssemblies(HashSet<AssemblyDetails> processedAssemblies)
+        {
+            if (processedAssemblies == null || processedAssemblies.Count == 0)
+            {
+                return;
+            }
+
+            // Assume all are top-level then clear when found as dependency
+            foreach (var asm in processedAssemblies)
+            {
+                asm.IsTopLevel = true;
+            }
+
+            // Collect all unique dependency names from all assemblies
+            var allDependencyNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+    
+            foreach (var asm in processedAssemblies)
+            {
+                if (asm.Dependencies != null)
+                {
+                    foreach (var dep in asm.Dependencies)
+                    {
+                        if (!string.IsNullOrEmpty(dep.Name))
+                        {
+                            allDependencyNames.Add(dep.Name);
+                        }
+                    }
+                }
+            }
+
+            // Mark assemblies as not top-level if their name appears in the dependency set
+         foreach (var asm in processedAssemblies)
+     {
+   if (allDependencyNames.Contains(asm.Name))
+  {
+         asm.IsTopLevel = false;
+                }
+            }
         }
     }
 }
